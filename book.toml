@@ -1,0 +1,6 @@
+[book]
+authors = ["Tnze"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Go-MC Tutorial"
