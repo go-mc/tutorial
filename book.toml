@@ -1,6 +1,6 @@
 [book]
+title = "Go-MC Tutorial"
 authors = ["Tnze"]
+src = "src"
 language = "zh"
 multilingual = false
-src = "src"
-title = "Go-MC Tutorial"
