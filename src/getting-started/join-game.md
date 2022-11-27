@@ -109,26 +109,26 @@ for {
     if err = client.HandleGame(); err == nil {
         panic("HandleGame never return nil")
     }
+	log.Printf(err)
 }
 ```
 
 在 `HandleGame()` 返回错误时，需要区分错误是否可恢复，如果是连接断开等不可恢复错误则需要停止程序，如果是单个数据包的处理出错则可以恢复。
 判断返回的错误是否可以恢复的方法是使用 `errors.As()` 函数，判断 `err` 是否是一个 `bot.PacketHandlerError` ，具体使用方法如下：
 
-```go
-var err error
-var perr bot.PacketHandlerError
-for {
-    if err = client.HandleGame(); err == nil {
-        panic("HandleGame never return nil")
-    }
-
-    if errors.As(err, &perr) {
-        log.Print(perr)
-    } else {
-        log.Fatal(err)
-    }
-}
+```diff
+  var err error
+  var perr bot.PacketHandlerError
+  for {
+      if err = client.HandleGame(); err == nil {
+          panic("HandleGame never return nil")
+      }
++     if errors.As(err, &perr) {
++         log.Print(perr)
++     } else {
++         log.Fatal(err)
++     }
+  }
 ```
 
 ## 下一步 · The next step
