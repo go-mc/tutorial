@@ -53,7 +53,7 @@ p := pk.Packet {
 }
 ```
 
-操作起来有点繁琐，不是吗。好在 Go-MC 为这样的操作提供了一个帮助函数：`pk.Marshal()`。经过改造的代码如下：
+操作起来有点繁琐，好在 Go-MC 为这样的操作提供了一个帮助函数：`pk.Marshal()`。经过改进的代码如下：
 
 ```go
 p := pk.Marshal(
@@ -67,11 +67,84 @@ p := pk.Marshal(
 
 反过来，如果服务器想接收一个这样的数据包，那么需要用到 `ReadFrom` 方法，用笨办法就是如下这样：
 
-// TODO
+```go
+var (
+	x        pk.Double
+	y        pk.Double
+	z        pk.Double
+	onGround pk.Boolean
+)
+r := bytes.NewReader(p.Data)
+_, _ = x.ReadFrom(r)
+_, _ = y.ReadFrom(r)
+_, _ = z.ReadFrom(r)
+_, _ = onGround.ReadFrom(r)
+```
+
+加上错误处理更加繁琐了！好在 Go-MC 也提供了一个帮助函数：`p.Scan()`。经过改进的代码如下：
+
+```go
+var (
+    x        pk.Double
+    y        pk.Double
+    z        pk.Double
+    onGround pk.Boolean
+)
+_ = p.Scan(&x, &y, &z, &onGround)
+```
+
+在实际使用中，一般需要根据情况选择是否使用帮助函数，请自行判断。
 
 ## 使用 `pk.Array`
 
-// TODO
+在一些数据包格式中，会存在 `Array of X` 类型的数组字段。
+这些数组的前一个字段通常是一个 `VarInt` 类型的长度字段， Go-MC 提供了一个帮助类型来处理这种常见情况。
+
+以 Commands 包为例，目前该数据包格式如下：
+
+| Field Name | Field Type      | Notes                                         |
+|------------|-----------------|-----------------------------------------------|
+| Count      | VarInt          | Number of elements in the following array.    |
+| Nodes      | Array of `Node` | An array of nodes.                            |
+| Root index | VarInt          | Index of the root node in the previous array. |
+
+我们假设你已经定义好 `Node` 类型并为其实现了 `pk.Field` 接口，为了接收这个数据包中的 Nodes 数组，
+我们可以采用以下繁琐的代码：
+
+```go
+var (
+	count pk.VarInt
+	nodes []Node
+	root  pk.VarInt
+)
+r := bytes.NewReader(p.Data)
+
+_, _ = count.ReadFrom(r)
+nodes = make([]Node, count)
+for i := range nodes {
+	_, _ = nodes[i].ReadFrom(r)
+}
+root.ReadFrom(r)
+```
+
+为了使用 `p.Scan()` 简化工作量，我们需要用到 `pk.Array()` 函数：
+
+```go
+var (
+	nodes []Node
+	root  pk.VarInt
+)
+_ = p.Scan(
+	pk.Array(&nodes),
+	&root,
+)
+```
+
+使用 `pk.Array()` ，会自动处理数组长度的 `VarInt`。返回值实现 `pk.Field` 接口，可用于 `pk.Marshal()` 与 `pk.Scan()`。  
+
+注意，当切片的元素类型不支持相应调用的 `WriteTo` 和 `ReadFrom` 方法时，会 panic。
+请确保将 `pk.Array()` 的返回值用作 `FieldEncoder` 时，切片元素类型也实现 `FieldEncoder`，
+将 `pk.Array()` 的返回值用作 `FieldDecoder` 时，切片元素类型也实现 `FieldDecoder`。
 
 ## 使用 `pk.Option`
 
