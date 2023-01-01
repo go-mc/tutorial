@@ -42,7 +42,7 @@ chatHandler = msg.New(client, player, playerList, msg.EventsHandler{
 })
 
 
-func onSystemMsg(c chat.Message, overlay bool) error {
+func onSystemMsg(msg chat.Message, overlay bool) error {
 	log.Printf("System: %v", c)
 	return nil
 }
