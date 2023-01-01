@@ -57,3 +57,9 @@ func onDisguisedMsg(msg chat.Message) error {
 	return nil
 }
 ```
+
+## 消息处理 · Handle Message
+
+Minecraft 使用 JSON 格式储存结构化的聊天消息，在消息中可以包含颜色、加粗、斜体等格式，以及点击事件、鼠标悬浮显示内容等功能。
+
+在 `go-mc/chat` 包提供了操作聊天消息的 API，请查看[处理聊天消息 · Chat](/chat/index.md)。
