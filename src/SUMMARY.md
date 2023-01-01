@@ -5,7 +5,7 @@
 - [快速上手 · Getting Started](getting-started/index.md)
   - [加入游戏 · Join Game](getting-started/join-game.md)
   - [基础功能 · Basic Module](getting-started/basic-module.md)
-  - [聊天功能 · Chat Message]()
+  - [聊天功能 · Chat Message](getting-started/chat-message.md)
   - [地形解析 · Level Data]()
   - [自定义模块 · Custom]()
 - [网络连接 · Network](network/index.md)
