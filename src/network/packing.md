@@ -148,4 +148,42 @@ _ = p.Scan(
 
 ## 使用 `pk.Option`
 
-// TODO
+一些数据包格式中，会存在 `Optional X` 类型的可选字段。顾名思义，这种字段在数据包中是可选的。
+可选字段是否存在需要根据上下文进行判断，上下文通常指其前面的 Boolean 值，例如：
+
+| Field Name | Field Type      | Notes                           |
+|------------|-----------------|---------------------------------|
+| Is Signed  | Boolean         |                                 |
+| Signature  | Optional String | Exist only if Is Signed is true |
+
+读取该数据包的伪代码如下：
+
+```go
+IsSigned = ReadBoolean()
+if IsSigned {
+	Signature = ReadString()
+}
+```
+
+为了能在 `p.Scan()` 函数调用中提供这样的判断逻辑，Go-MC 提供了四个帮助类型：`pk.Option` 、 `pk.OptionDecoder` 、 `pk.OptionEncoder` 和 `pk.Opt`。
+
+`pk.Opt` 是一个一般不会用到的原始类型，如需使用请自行阅读注释及源码，在此不做说明。
+
+`pk.Option` 是一个泛型类型，有两个泛型参数：`T` 和 `P`，其中后者是前者的指针类型。
+`T` 必须满足 `pk.FieldEncoder` 接口，`P` 必须满足 `FieldDecoder` 接口。
+
+例如：`pk.Option[pk.String, *pk.String]`，`pk.Option[pk.VarInt, *pk.VarInt]`等，都是合法的类型。
+
+需要手动指定 `P` 是因为当前 Go 编译器泛型实现不够完善[^1]，在 Go 支持推导结构体泛型参数类型之后，
+上面的两个例子就可以简单写成 `pk.Option[pk.String]` 和 `pk.Option[pk.VarInt]` 了。
+
+[^1] [Type Parameters Proposal](https://go.googlesource.com/proposal/+/refs/heads/master/design/43651-type-parameters.md#pointer-method-example)
+
+`pk.OptionDecoder` 和 `pk.OptionEncoder` 是两个变体，分别去掉了 对`T`的约束 和 对`P`的约束，很好理解。
+
+以下给出读写上面例子数据包的完整代码
+
+```go
+var Signature pk.Option[pk.String, *pk.String]
+_ = p.Scan(&Signature)
+```
