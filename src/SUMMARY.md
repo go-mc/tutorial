@@ -14,6 +14,6 @@
 - [编解码 NBT]()
   - [使用SNBT]()
 - [处理聊天消息 · Chat](chat/index.md)
-- [编写服务端 · Writing Server]()
+- [编写服务端 · Writing Server](writing-server/index.md)
 - [贡献 · Contributing]()
   - [Go-MC 版本更新 · Update]()
